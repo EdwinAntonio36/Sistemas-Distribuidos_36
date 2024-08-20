@@ -1,0 +1,36 @@
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 80
+
+
+ENV ASPNETCORE_URLS=http://+:80
+WORKDIR /tmp
+RUN echo "Edwin Antonio Quintero Velazquez" > /tmp/numeroAlumno.txt 
+
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG configuration=Release
+WORKDIR /src
+
+
+COPY ["FileDownload.csproj", "./"]
+RUN dotnet restore "./FileDownload.csproj"
+
+
+COPY . .
+RUN dotnet build "FileDownload.csproj" -c $configuration -o /app/build
+
+
+FROM build AS publish
+ARG configuration=Release
+RUN dotnet publish "FileDownload.csproj" -c $configuration -o /app/publish /p:UseAppHost=false
+
+
+FROM base AS final
+WORKDIR /app
+
+
+COPY --from=publish /app/publish .
+
+
+ENTRYPOINT ["dotnet", "FileDownload.dll"]
