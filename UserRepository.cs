@@ -38,4 +38,48 @@ public class UserRespository : IUserRepository{
         return users.Select(user => user.ToModel()).ToList();
     }
 
+
+    public async Task DeleteByIdAsync(UserModel user, CancellationToken cancellationToken)
+    {
+        var userEntity = user.ToEntity();
+        _dbContext.Users.Remove(userEntity);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<UserModel> CreateAsync(UserModel user, CancellationToken cancellationToken)
+    {
+        var userEntity = user.ToEntity();
+        userEntity.Id = Guid.NewGuid();
+        await _dbContext.AddAsync(userEntity, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return userEntity.ToModel();      
+    }
+
+public async Task<bool> UpdateUser(Guid id,string firstName,string lastName,DateTime birthday, CancellationToken cancellationToken)
+    {
+        var user = await _dbContext.Users.FindAsync(new object[] { id }, cancellationToken);
+
+        if (user == null)
+        {
+            return false; 
+        }
+
+        user.FirstName = firstName;
+        user.LastName = lastName;
+        user.Birthday = birthday;
+
+        _dbContext.Users.Update(user);
+
+        try
+        {
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return true; 
+        }
+        catch (Exception)
+        {
+            
+            return false; 
+        }
+    }
 }
