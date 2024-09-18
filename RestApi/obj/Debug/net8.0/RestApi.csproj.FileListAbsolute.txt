@@ -44,3 +44,17 @@ C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos
 C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos\Proyectos\RestApi\bin\Debug\net8.0\runtimes\linux\native\libmongocrypt.so
 C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos\Proyectos\RestApi\bin\Debug\net8.0\runtimes\osx\native\libmongocrypt.dylib
 C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos\Proyectos\RestApi\bin\Debug\net8.0\runtimes\win\native\mongocrypt.dll
+C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos\Proyectos\RestApi\bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll
+C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos\Proyectos\RestApi\bin\Debug\net8.0\SoapCore.dll
+C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos\Proyectos\RestApi\bin\Debug\net8.0\System.CodeDom.dll
+C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos\Proyectos\RestApi\bin\Debug\net8.0\System.Drawing.Common.dll
+C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos\Proyectos\RestApi\bin\Debug\net8.0\System.Private.ServiceModel.dll
+C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos\Proyectos\RestApi\bin\Debug\net8.0\System.Security.Permissions.dll
+C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos\Proyectos\RestApi\bin\Debug\net8.0\System.ServiceModel.Http.dll
+C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos\Proyectos\RestApi\bin\Debug\net8.0\System.ServiceModel.Primitives.dll
+C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos\Proyectos\RestApi\bin\Debug\net8.0\System.ServiceModel.dll
+C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos\Proyectos\RestApi\bin\Debug\net8.0\System.Windows.Extensions.dll
+C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos\Proyectos\RestApi\bin\Debug\net8.0\runtimes\win\lib\netcoreapp3.0\Microsoft.Win32.SystemEvents.dll
+C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos\Proyectos\RestApi\bin\Debug\net8.0\runtimes\unix\lib\netcoreapp3.0\System.Drawing.Common.dll
+C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos\Proyectos\RestApi\bin\Debug\net8.0\runtimes\win\lib\netcoreapp3.0\System.Drawing.Common.dll
+C:\Users\Gods\OneDrive\Documentos\Universidad\5to semestre\Sistemas_Distribuidos\Proyectos\RestApi\bin\Debug\net8.0\runtimes\win\lib\netcoreapp3.0\System.Windows.Extensions.dll
