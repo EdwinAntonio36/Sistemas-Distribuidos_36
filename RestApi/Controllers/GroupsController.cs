@@ -25,4 +25,11 @@ public class GropusController : ControllerBase{
        
        return Ok(group.ToDto());
     }
+
+
+    [HttpGet] // Esta es la ruta para buscar por nombre
+    public async Task<ActionResult<List<GroupResponse>>> GetGroupsByName([FromQuery]string name, CancellationToken cancellationToken){
+    var groups = await _groupService.GetGroupByNameAsync(name, cancellationToken);
+    return Ok(groups.Select(g => g.ToDto()).ToList());
+    }
 }

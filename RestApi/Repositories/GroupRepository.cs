@@ -30,4 +30,21 @@ public class GroupRepository : IGroupRepository
 
         }
     }
+    public async Task<List<GroupModel>>  GetByNameAsync(string name, CancellationToken cancellationToken){
+
+    var filter = Builders<GroupEntity>.Filter.Regex(x => x.Name, new MongoDB.Bson.BsonRegularExpression(name, "i"));   
+    var groupEntities = await _groups.Find(filter).ToListAsync(cancellationToken);
+
+    var groupModels = groupEntities.Select(g => new GroupModel
+    {
+        Id = g.Id,
+        Name = g.Name,
+        Users = g.Users,
+        CreationDate = g.CreatedAt
+    }).ToList();
+
+    return groupModels;
+    }
+
+
 }

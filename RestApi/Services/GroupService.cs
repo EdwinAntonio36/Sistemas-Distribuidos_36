@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
-using Rest.Api.Repositories;
 using RestApi.Models;
+using Rest.Api.Repositories;
 
 namespace RestApi.Services;
 
@@ -27,4 +27,17 @@ public class GroupService : IGroupService
             CreationDate = group.CreationDate
         };
     }
+
+public async Task<List<GroupUserModel>> GetGroupByNameAsync(string name, CancellationToken cancellationToken)
+{
+    var groups = await _groupRepository.GetByNameAsync(name, cancellationToken);
+    return groups.Select(g => new GroupUserModel
+    {
+        Id = g.Id,
+        Name = g.Name,
+        CreationDate = g.CreationDate
+    }).ToList();
+}
+
+
 }

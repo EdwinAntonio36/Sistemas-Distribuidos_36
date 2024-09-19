@@ -11,6 +11,9 @@ public interface IUserContract{
     public Task<UserResponseDto> GetUserById(Guid userId, CancellationToken cancellationToken); 
 
     [OperationContract]
+    public Task<UserResponseDto> GetUserByName(Guid userName, CancellationToken cancellationToken); 
+
+    [OperationContract]
     public Task<IList<UserResponseDto>> GetAll(CancellationToken cancellationToken);
 
     [OperationContract]
