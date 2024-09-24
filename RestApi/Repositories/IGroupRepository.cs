@@ -6,5 +6,5 @@ public interface IGroupRepository{
 
     Task<GroupModel> GetByIdAsync(string id, CancellationToken cancellationToken);
 
-    Task<List<GroupModel>> GetByNameAsync(string name, CancellationToken cancellationToken);
+    Task<IEnumerable<GroupModel>> GetByNameAsync(string name, CancellationToken cancellationToken);
 }

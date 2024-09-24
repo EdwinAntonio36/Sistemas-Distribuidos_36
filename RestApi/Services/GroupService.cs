@@ -1,43 +1,63 @@
 using Microsoft.AspNetCore.SignalR;
 using RestApi.Models;
 using Rest.Api.Repositories;
+using RestApi.Repositories;
+using System.Collections;
 
 namespace RestApi.Services;
 
 public class GroupService : IGroupService
 {
-
-        private readonly IGroupRepository _groupRepository;
-
-        public GroupService(IGroupRepository groupRepository){
-            _groupRepository = groupRepository;
-        }
-
-    public async Task<GroupUserModel> GetGroupByIdAsync(string id, CancellationToken cancellationToken)
+    private readonly IGroupRepository _groupRepository;
+    private readonly IUserRepository _userRepository;
+    public GroupService(IGroupRepository groupRepository, IUserRepository userRepository){
+        _groupRepository = groupRepository;
+        _userRepository = userRepository;
+    }
+    public async Task<GroupUserModel> GetGroupByIdAsync(string Id, CancellationToken cancellationToken)
     {
-        var group = await _groupRepository.GetByIdAsync(id, cancellationToken);
+        var group = await _groupRepository.GetByIdAsync(Id, cancellationToken);
         if(group is null){
-            return null; 
+            return null;
         }
-
         return new GroupUserModel{
-
-              Id = group.Id,
+            Id = group.Id,
             Name = group.Name,
-            CreationDate = group.CreationDate
+            CreationDate = group.CreationDate,
+            Users = (await Task.WhenAll(group.Users.Select(userId => _userRepository.GetByIdAsync(userId, cancellationToken)))).Where(user => user !=null).ToList()
+
         };
     }
 
-public async Task<List<GroupUserModel>> GetGroupByNameAsync(string name, CancellationToken cancellationToken)
-{
-    var groups = await _groupRepository.GetByNameAsync(name, cancellationToken);
-    return groups.Select(g => new GroupUserModel
-    {
-        Id = g.Id,
-        Name = g.Name,
-        CreationDate = g.CreationDate
-    }).ToList();
-}
 
+
+    public async Task<IEnumerable<GroupUserModel>> GetGroupByNameAsync(string name, int pageIndex, int pageSize, string orderBy, CancellationToken cancellationToken)
+    {
+        var groups = await _groupRepository.GetByNameAsync(name, cancellationToken);
+
+        var groupUserModels = await Task.WhenAll(groups.Select(async group => 
+        {
+            var users = await Task.WhenAll(group.Users.Select(userId => _userRepository.GetByIdAsync(userId, cancellationToken)));
+            return new GroupUserModel
+            {
+                Id = group.Id,
+                Name = group.Name,
+                CreationDate = group.CreationDate,
+                Users = users.Where(user => user != null).ToList()
+            };
+        }));
+
+        var orderedGroups = orderBy switch
+        {
+            "name" => groupUserModels.OrderBy(g => g.Name),
+            "creationDate" => groupUserModels.OrderBy(g => g.CreationDate),
+            _ => groupUserModels.OrderBy(g => g.Name)
+        };
+
+        return orderedGroups
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
 
 }
