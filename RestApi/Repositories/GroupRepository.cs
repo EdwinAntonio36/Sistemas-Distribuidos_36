@@ -30,21 +30,11 @@ public class GroupRepository : IGroupRepository
 
         }
     }
-    public async Task<List<GroupModel>>  GetByNameAsync(string name, CancellationToken cancellationToken){
-
-    var filter = Builders<GroupEntity>.Filter.Regex(x => x.Name, new MongoDB.Bson.BsonRegularExpression(name, "i"));   
-    var groupEntities = await _groups.Find(filter).ToListAsync(cancellationToken);
-
-    var groupModels = groupEntities.Select(g => new GroupModel
+    public async Task<IEnumerable<GroupModel>> GetByNameAsync(string name, CancellationToken cancellationToken) // Nuevo método
     {
-        Id = g.Id,
-        Name = g.Name,
-        Users = g.Users,
-        CreationDate = g.CreatedAt
-    }).ToList();
-
-    return groupModels;
+        var filter = Builders<GroupEntity>.Filter.Regex(x => x.Name, new MongoDB.Bson.BsonRegularExpression(name, "i")); // Búsqueda por coincidencia parcial
+        var groups = await _groups.Find(filter).ToListAsync(cancellationToken);
+        return groups.Select(group => group.ToModel());
     }
-
 
 }
