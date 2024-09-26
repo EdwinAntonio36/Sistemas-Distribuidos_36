@@ -1,43 +1,116 @@
 using Microsoft.AspNetCore.SignalR;
 using RestApi.Models;
 using Rest.Api.Repositories;
+using RestApi.Repositories;
+using System.Collections;
+using RestApi.Exceptions;
+using DnsClient.Protocol;
 
 namespace RestApi.Services;
 
 public class GroupService : IGroupService
 {
+    private readonly IGroupRepository _groupRepository;
+    private readonly IUserRepository _userRepository;
+    public GroupService(IGroupRepository groupRepository, IUserRepository userRepository){
+        _groupRepository = groupRepository;
+        _userRepository = userRepository;
+    }
 
-        private readonly IGroupRepository _groupRepository;
 
-        public GroupService(IGroupRepository groupRepository){
-            _groupRepository = groupRepository;
+public async Task<GroupUserModel> CreateGroupAsync(string name,  Guid[] users, int pageIndex, int pageSize, string orderBy, CancellationToken cancellationToken){
+        if (users.Length == 0)
+        {
+            throw new InvalidGroupRequestFormatException();
         }
-
-    public async Task<GroupUserModel> GetGroupByIdAsync(string id, CancellationToken cancellationToken)
-    {
-        var group = await _groupRepository.GetByIdAsync(id, cancellationToken);
-        if(group is null){
-            return null; 
+        var groups = await _groupRepository.GetByNameAsync(name,pageIndex,pageSize,orderBy, cancellationToken);
+        if(groups.Any()){
+            throw new GroupAlreadyExistsException();
         }
-
+        var group = await _groupRepository.CreateGroupAsync(name,users,cancellationToken);
         return new GroupUserModel{
-
-              Id = group.Id,
+            Id = group.Id,
             Name = group.Name,
-            CreationDate = group.CreationDate
+            CreationDate = group.CreationDate,
+            Users = (await Task.WhenAll(group.Users.Select(userId => _userRepository.GetByIdAsync(userId, cancellationToken)))).Where(user => user !=null).ToList()
         };
     }
 
-public async Task<List<GroupUserModel>> GetGroupByNameAsync(string name, CancellationToken cancellationToken)
-{
-    var groups = await _groupRepository.GetByNameAsync(name, cancellationToken);
-    return groups.Select(g => new GroupUserModel
+
+
+
+
+    public async Task DeleteGroupByIdAsync(string id, CancellationToken cancellationToken)
     {
-        Id = g.Id,
-        Name = g.Name,
-        CreationDate = g.CreationDate
-    }).ToList();
-}
+        var group = await _groupRepository.GetByIdAsync(id, cancellationToken);
+        if(group is null){
+            throw new GroupNotFoundException();
+        }
+
+        await _groupRepository.DeleteByIdAsync(id, cancellationToken);
+
+        
+    }
+
+    public async Task<GroupUserModel> GetGroupByIdAsync(string Id, CancellationToken cancellationToken)
+    {
+        var group = await _groupRepository.GetByIdAsync(Id, cancellationToken);
+        if(group is null){
+            return null;
+        }
+        return new GroupUserModel{
+            Id = group.Id,
+            Name = group.Name,
+            CreationDate = group.CreationDate,
+            Users = (await Task.WhenAll(group.Users.Select(userId => _userRepository.GetByIdAsync(userId, cancellationToken)))).Where(user => user !=null).ToList()
+
+        };
+    }
+
+
+
+    public async Task<IEnumerable<GroupUserModel>> GetGroupByNameAsync(string name, int pageIndex, int pageSize, string orderBy, CancellationToken cancellationToken)
+    {
+        var groups = await _groupRepository.GetByNameAsync(name, pageIndex, pageSize, orderBy, cancellationToken);
+
+        var groupUserModels = await Task.WhenAll(groups.Select(async group => 
+        {
+            var users = await Task.WhenAll(group.Users.Select(userId => _userRepository.GetByIdAsync(userId, cancellationToken)));
+            return new GroupUserModel
+            {
+                Id = group.Id,
+                Name = group.Name,
+                CreationDate = group.CreationDate,
+                Users = users.Where(user => user != null).ToList()
+            };
+        }));
+
+        var orderedGroups = orderBy switch
+        {
+            "name" => groupUserModels.OrderBy(g => g.Name),
+            "creationDate" => groupUserModels.OrderBy(g => g.CreationDate),
+            _ => groupUserModels.OrderBy(g => g.Name)
+        };
+
+        return orderedGroups
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
+
+public async Task<GroupUserModel> GetByNameSpecifiedAsync(string name, CancellationToken cancellationToken){
+        var group = await _groupRepository.GetByNameSpecAsync(name, cancellationToken);
+        if(group is null){
+            return null;
+        }
+        return new GroupUserModel{
+            Id = group.Id,
+            Name = group.Name,
+            CreationDate = group.CreationDate,
+            Users = (await Task.WhenAll(group.Users.Select(userId => _userRepository.GetByIdAsync(userId, cancellationToken)))).Where(user => user !=null).ToList()
+        };
+    }
 
 
 }
