@@ -8,10 +8,10 @@ USER app
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG configuration=Release
 WORKDIR /src
-COPY ["RestApi/RestApi.csproj", "RestApi/"]
-RUN dotnet restore "RestApi/RestApi.csproj"
+COPY ["RestApi.csproj", "./"]
+RUN dotnet restore "RestApi.csproj"
 COPY . .
-WORKDIR "/src/RestApi"
+WORKDIR "/src/."
 RUN dotnet build "RestApi.csproj" -c $configuration -o /app/build
 
 FROM build AS publish
