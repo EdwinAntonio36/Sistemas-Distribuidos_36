@@ -1,26 +1,64 @@
-using Microsoft.EntityFrameworkCore;
-using SoapApi.Contracts;
-using SoapApi.Infrastructure;
-using SoapApi.Repositories;
-using SoapApi.Services;
-using SoapCore;
+using MongoDB.Driver;
+using Rest.Api.Repositories;
+using RestApi.Repositories;
+using RestApi.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSoapCore();
-builder.Services.AddScoped<IUserRepository, UserRespository>();
-builder.Services.AddScoped<IUserContract, UserService>();
-builder.Services.AddScoped<IBookRepository, BookRepository>();
-builder.Services.AddScoped<IBookContract, BookService>();
+// Add services to the container.
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddControllers();
+builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<IMongoClient, MongoClient>(s => new MongoClient(builder.Configuration.GetValue<String>("MongoDb:Groups:ConnectionString")));
 
 
 
-builder.Services.AddDbContext<RelationalDbContext>(Options => Options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<IGroupRepository, GroupRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>{
+        options.Authority = builder.Configuration.GetValue<string>("Authentication:Authority");
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters{
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration.GetValue<string>("Authentication:Issuer"),
+            ValidateActor = false,
+            ValidateLifetime = true,
+            ValidateAudience = true,
+            ValidAudience = "groups-api",
+            ValidateIssuerSigningKey = true
+        };
+    });
+
+builder.Services.AddAuthorization(options => {
+    options.AddPolicy("Read", policy => policy.RequireClaim("http://schemas.microsoft.com/identity/claims/scope", "read"));
+    options.AddPolicy("Write", policy => policy.RequireClaim("http://schemas.microsoft.com/identity/claims/scope", "write"));
+});
+
+
+
 
 var app = builder.Build();
-app.UseSoapEndpoint<IUserContract>("/UserService.svc", new SoapEncoderOptions());
-
-app.UseSoapEndpoint<IBookContract>("/BookService.svc", new SoapEncoderOptions());
 
 
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseHttpsRedirection();
+app.MapControllers();
 app.Run();
