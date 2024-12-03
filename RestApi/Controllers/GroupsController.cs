@@ -6,6 +6,10 @@ using System.Text.RegularExpressions;
 using RestApi.Exceptions;
 using System.Net;
 
+using Microsoft.AspNetCore.Authorization;
+=======
+
+
 namespace RestApi.Controllers;
 
 [ApiController]
@@ -17,6 +21,7 @@ public class GroupsController : ControllerBase
     {
         _groupService = groupService;
     }
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<ActionResult<GroupResponse>> GetGroupById(string id, CancellationToken cancellationToken)
     {
@@ -72,10 +77,6 @@ public class GroupsController : ControllerBase
 
         return Ok(groups.Select(group => group.ToDto()));
     }
-
-
-
-
 
     [HttpDelete("{id}")]
 
@@ -156,6 +157,6 @@ public class GroupsController : ControllerBase
 
         }
     }
-=======
+
 
 }

@@ -57,6 +57,9 @@ public class GroupRepository : IGroupRepository
 
 
     public async Task<IEnumerable<GroupModel>> GetByNameAsync(string name, int pageIndex, int pageSize, string orderBy, CancellationToken cancellationToken) // Nuevo método
+
+
+    public async Task<IEnumerable<GroupModel>> GetByNameAsync(string name, int pageIndex, int pageSize, string orderBy, CancellationToken cancellationToken) // Nuevo método
     {
         var filter = Builders<GroupEntity>.Filter.Regex(x => x.Name, new MongoDB.Bson.BsonRegularExpression(name, "i"));
         var groups = await _groups.Find(filter).ToListAsync(cancellationToken);
@@ -88,6 +91,7 @@ public class GroupRepository : IGroupRepository
 
     public async Task<IEnumerable<GroupModel>> GetByNameAsync(string name, CancellationToken cancellationToken) // Nuevo método
 
+
     {
         var filter = Builders<GroupEntity>.Filter.Regex(x => x.Name, new MongoDB.Bson.BsonRegularExpression(name, "i"));
         var groups = await _groups.Find(filter).ToListAsync(cancellationToken);
@@ -102,8 +106,8 @@ public class GroupRepository : IGroupRepository
             .Skip((pageIndex - 1) * pageSize)
             .Take(pageSize)
             .ToModel();
-    }
 
+    }
 
     public async Task<GroupModel> GetByNameSpecAsync(string name, CancellationToken cancellationToken){
         try{
@@ -115,6 +119,11 @@ public class GroupRepository : IGroupRepository
         }
     }
 
+
+    }
+
+
+
     public async Task UpdateGroupAsync(string id, string name, Guid[] users, CancellationToken cancellationToken)
     {
 
@@ -123,7 +132,5 @@ public class GroupRepository : IGroupRepository
 
         await _groups.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
     }
-
-
 
 }
