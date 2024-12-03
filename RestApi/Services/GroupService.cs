@@ -5,6 +5,10 @@ using RestApi.Repositories;
 using System.Collections;
 using RestApi.Exceptions;
 using DnsClient.Protocol;
+
+using MongoDB.Driver.Core.Operations;
+
+
 namespace RestApi.Services;
 
 public class GroupService : IGroupService
@@ -26,6 +30,15 @@ public async Task<GroupUserModel> CreateGroupAsync(string name,  Guid[] users, i
         if(groups.Any()){
             throw new GroupAlreadyExistsException();
         }
+
+        foreach (var userId in users ){
+            var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+            if (user == null){
+                throw new UserNotFoundException();
+            }
+        }
+
+
         var group = await _groupRepository.CreateGroupAsync(name,users,cancellationToken);
         return new GroupUserModel{
             Id = group.Id,
@@ -109,6 +122,37 @@ public async Task<GroupUserModel> GetByNameSpecifiedAsync(string name, Cancellat
             CreationDate = group.CreationDate,
             Users = (await Task.WhenAll(group.Users.Select(userId => _userRepository.GetByIdAsync(userId, cancellationToken)))).Where(user => user !=null).ToList()
         };
+    }
+
+
+    public async Task UpdateGroupAsync(string id, string name, Guid[] users, CancellationToken cancellationToken)
+    {
+         if (users.Length == 0)
+        {
+            throw new InvalidGroupRequestFormatException();
+        }
+        foreach (var userId in users ){
+            var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+            if (user == null){
+                throw new UserNotFoundException();
+            }
+        }
+
+        var group = await _groupRepository.GetByIdAsync(id, cancellationToken);
+            if(group is null){
+                throw new GroupNotFoundException();
+            }
+
+            var groups = await _groupRepository.GetByNameSpecAsync(name, cancellationToken);
+            if(groups != null && groups.Id != id){
+                throw new GroupAlreadyExistsException();
+            }
+
+
+
+            await _groupRepository.UpdateGroupAsync(id, name, users, cancellationToken);
+
+        
     }
 
 }

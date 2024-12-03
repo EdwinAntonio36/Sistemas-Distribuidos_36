@@ -54,6 +54,9 @@ public class GroupRepository : IGroupRepository
     }
 
     public async Task<IEnumerable<GroupModel>> GetByNameAsync(string name, int pageIndex, int pageSize, string orderBy, CancellationToken cancellationToken) // Nuevo método
+
+
+    public async Task<IEnumerable<GroupModel>> GetByNameAsync(string name, int pageIndex, int pageSize, string orderBy, CancellationToken cancellationToken) // Nuevo método
     {
         var filter = Builders<GroupEntity>.Filter.Regex(x => x.Name, new MongoDB.Bson.BsonRegularExpression(name, "i"));
         var groups = await _groups.Find(filter).ToListAsync(cancellationToken);
@@ -84,11 +87,43 @@ public class GroupRepository : IGroupRepository
 
 
     public async Task<IEnumerable<GroupModel>> GetByNameAsync(string name, CancellationToken cancellationToken) // Nuevo método
+
     {
-        var filter = Builders<GroupEntity>.Filter.Regex(x => x.Name, new MongoDB.Bson.BsonRegularExpression(name, "i")); // Búsqueda por coincidencia parcial
+        var filter = Builders<GroupEntity>.Filter.Regex(x => x.Name, new MongoDB.Bson.BsonRegularExpression(name, "i"));
         var groups = await _groups.Find(filter).ToListAsync(cancellationToken);
-        return groups.Select(group => group.ToModel());
+        var orderedGroups = orderBy switch
+        {
+            "name" => groups.OrderBy(g => g.Name),
+            "creationDate" => groups.OrderBy(g => g.CreatedAt),
+            _ => groups.OrderBy(g => g.Name)
+        };
+
+        return orderedGroups
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToModel();
     }
+
+
+    public async Task<GroupModel> GetByNameSpecAsync(string name, CancellationToken cancellationToken){
+        try{
+            var filter = Builders<GroupEntity>.Filter.Eq(x => x.Name, name);
+            var group = await _groups.Find(filter).FirstOrDefaultAsync(cancellationToken);
+            return group.ToModel();
+        }catch(FormatException){
+            return null;
+        }
+    }
+
+    public async Task UpdateGroupAsync(string id, string name, Guid[] users, CancellationToken cancellationToken)
+    {
+
+        var filter = Builders<GroupEntity>.Filter.Eq(x => x.Id, id);
+        var update = Builders<GroupEntity>.Update.Set(s => s.Name,name).Set(s => s.Users,users);
+
+        await _groups.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
+    }
+
 
 
 }

@@ -74,6 +74,9 @@ public class GroupsController : ControllerBase
     }
 
 
+
+
+
     [HttpDelete("{id}")]
 
     public async Task <IActionResult> DeleteGroup(string id, CancellationToken cancellationToken){
@@ -121,4 +124,38 @@ public class GroupsController : ControllerBase
         
         };
     }
+
+
+    [HttpPut("{id}")]
+
+    public async Task <IActionResult> UpdateGroup(string id, [FromBody] UpdateGroupRequest groupRequest, CancellationToken cancellationToken){
+            try{
+                await _groupService.UpdateGroupAsync(id, groupRequest.Name, groupRequest.Users, cancellationToken);
+                return NoContent();
+            } catch (GroupNotFoundException){
+                return NoContent();
+            } 
+            
+            catch (InvalidGroupRequestFormatException)
+        {
+            return BadRequest(NewValidationProblemDetails("One or more validation errors ocurred", HttpStatusCode.BadRequest, new Dictionary<string, string[]>{
+                {"Groups", ["Users array is empty"]}
+            }));
+             } catch (GroupAlreadyExistsException)
+              {
+            return Conflict(NewValidationProblemDetails("One or more validation errors ocurred", HttpStatusCode.Conflict, new Dictionary<string, string[]>{
+                {"Groups", ["Group with same name already exists"]}
+            }));
+            
+
+             } catch (UserNotFoundException)
+              {
+            return NotFound(NewValidationProblemDetails("One or more validation errors ocurred", HttpStatusCode.Conflict, new Dictionary<string, string[]>{
+                {"Groups", ["User ID Not Found "]}
+            }));
+
+        }
+    }
+=======
+
 }
