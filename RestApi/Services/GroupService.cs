@@ -5,7 +5,6 @@ using RestApi.Repositories;
 using System.Collections;
 using RestApi.Exceptions;
 using DnsClient.Protocol;
-
 namespace RestApi.Services;
 
 public class GroupService : IGroupService
@@ -111,6 +110,5 @@ public async Task<GroupUserModel> GetByNameSpecifiedAsync(string name, Cancellat
             Users = (await Task.WhenAll(group.Users.Select(userId => _userRepository.GetByIdAsync(userId, cancellationToken)))).Where(user => user !=null).ToList()
         };
     }
-
 
 }
