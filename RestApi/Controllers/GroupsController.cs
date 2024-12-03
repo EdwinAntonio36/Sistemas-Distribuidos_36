@@ -11,7 +11,6 @@ namespace RestApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-
 public class GroupsController : ControllerBase
 {
     private readonly IGroupService _groupService;
@@ -154,4 +153,5 @@ public class GroupsController : ControllerBase
 
         }
     }
+
 }
