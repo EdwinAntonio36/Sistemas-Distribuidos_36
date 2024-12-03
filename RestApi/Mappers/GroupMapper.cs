@@ -33,4 +33,13 @@ public static class GroupMapper{
             CreationDate = group.CreatedAt
         };
     }
+
+    public static List <GroupModel> ToModel (this IEnumerable <GroupEntity> users){
+        return users.Select(s => new GroupModel{
+            Id = s.Id,
+            Name = s.Name,
+            Users = s.Users
+        }).ToList();
+    }
+
 }

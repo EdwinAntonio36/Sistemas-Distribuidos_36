@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using RestApi.Dtos;
 using RestApi.Services;
 using RestApi.Mappers;
+using System.Text.RegularExpressions;
+using RestApi.Exceptions;
+using System.Net;
 
 namespace RestApi.Controllers;
 
@@ -70,4 +73,52 @@ public class GroupsController : ControllerBase
         return Ok(groups.Select(group => group.ToDto()));
     }
 
+
+    [HttpDelete("{id}")]
+
+    public async Task <IActionResult> DeleteGroup(string id, CancellationToken cancellationToken){
+        try {
+            await _groupService.DeleteGroupByIdAsync(id, cancellationToken);
+            return NoContent();
+            } catch (GroupNotFoundException){
+                return NotFound();
+            } 
+
+
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<GroupResponse>> CreateGroup([FromBody] CreateGroupRequest groupRequest, CancellationToken cancellationToken,
+        [FromQuery] int pageIndex = 1, 
+        [FromQuery] int pageSize = 10, 
+        [FromQuery] string orderBy = "name")
+    
+    
+    {
+        try
+        {
+            var group = await _groupService.CreateGroupAsync(groupRequest.Name, groupRequest.Users,  pageIndex, pageSize, orderBy,  cancellationToken);
+            return CreatedAtAction(nameof(GetGroupById), new { id = group.Id }, group.ToDto());
+        }
+        catch (InvalidGroupRequestFormatException)
+        {
+            return BadRequest(NewValidationProblemDetails("One or more validation errors ocurred", HttpStatusCode.BadRequest, new Dictionary<string, string[]>{
+                {"Groups", ["Users array is empty"]}
+            }));
+        }
+        catch (GroupAlreadyExistsException)
+        {
+            return Conflict(NewValidationProblemDetails("One or more validation errors ocurred", HttpStatusCode.Conflict, new Dictionary<string, string[]>{
+                {"Groups", ["Group with same name already exists"]}
+            }));
+        }
+    }
+    private static ValidationProblemDetails NewValidationProblemDetails(string title, HttpStatusCode statusCode, Dictionary<string, string[]> errors){
+        return new ValidationProblemDetails {
+            Title = title,
+            Status = (int) statusCode,
+            Errors = errors
+        
+        };
+    }
 }
