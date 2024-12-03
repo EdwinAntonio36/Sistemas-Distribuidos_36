@@ -73,6 +73,10 @@ public class GroupsController : ControllerBase
         return Ok(groups.Select(group => group.ToDto()));
     }
 
+
+
+
+
     [HttpDelete("{id}")]
 
     public async Task <IActionResult> DeleteGroup(string id, CancellationToken cancellationToken){
@@ -121,6 +125,7 @@ public class GroupsController : ControllerBase
         };
     }
 
+
     [HttpPut("{id}")]
 
     public async Task <IActionResult> UpdateGroup(string id, [FromBody] UpdateGroupRequest groupRequest, CancellationToken cancellationToken){
@@ -151,4 +156,6 @@ public class GroupsController : ControllerBase
 
         }
     }
+=======
+
 }
