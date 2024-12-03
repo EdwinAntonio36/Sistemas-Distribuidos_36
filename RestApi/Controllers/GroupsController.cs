@@ -5,7 +5,10 @@ using RestApi.Mappers;
 using System.Text.RegularExpressions;
 using RestApi.Exceptions;
 using System.Net;
+
 using Microsoft.AspNetCore.Authorization;
+=======
+
 
 namespace RestApi.Controllers;
 
@@ -123,6 +126,7 @@ public class GroupsController : ControllerBase
         };
     }
 
+
     [HttpPut("{id}")]
 
     public async Task <IActionResult> UpdateGroup(string id, [FromBody] UpdateGroupRequest groupRequest, CancellationToken cancellationToken){
@@ -153,5 +157,6 @@ public class GroupsController : ControllerBase
 
         }
     }
+
 
 }
